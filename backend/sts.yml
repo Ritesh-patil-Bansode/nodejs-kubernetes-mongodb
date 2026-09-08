@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  
+  serviceName: mongodb   
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongodb
+
+  template:
+    metadata:
+      labels:
+        app: mongodb
+
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          command:
+            - mongod          # mongodb server start
+            - --bind_ip_all   # Allow mongodb to accept connection from other pods
+            - --replSet       # to Enabled Replica set mode.
+            - rs0             # name of Replica set
+
+          ports:
+            - containerPort: 27017
+
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+
+
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
